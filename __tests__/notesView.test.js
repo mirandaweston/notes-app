@@ -1,6 +1,6 @@
-
-// @jest-environment jsdom
-
+/**
+ * @jest-environment jsdom
+ */
 
 const fs = require('fs')
 
