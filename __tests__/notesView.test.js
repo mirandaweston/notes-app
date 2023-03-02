@@ -2,10 +2,12 @@
  * @jest-environment jsdom
  */
 
+require('jest-fetch-mock').enableMocks()
 const fs = require('fs')
 
 const NotesModel = require('../src/notesModel');
 const NotesView = require('../src/notesView');
+const NotesClient = require('../src/notesClient');
 
 describe('Notes view', () => {
   it('displays two notes', () => {
@@ -50,4 +52,15 @@ describe('Notes view', () => {
 
     expect(document.querySelectorAll('div.note').length).toEqual(2);
   });
+
+  it('fetches and displays information from the API', (done) => {
+    const mockClient = {loadNotes: (callback) => callback(['Mocking note'])}
+    const model = new NotesModel();
+    const view = new NotesView(model, mockClient);
+
+    view.displayNotesFromApi();
+    const noteE1 = document.querySelector('.note');
+    expect(noteE1.textContent).toEqual('Mocking note')
+    done();
+  })
 })

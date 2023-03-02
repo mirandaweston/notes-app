@@ -1,6 +1,7 @@
 class NotesView {
-  constructor(model) {
+  constructor(model, client) {
     this.model = model;
+    this.client = client;
     this.mainContainerE1 = document.querySelector('#main-container');
 
     this.buttonEl = document.querySelector('#add-note-btn');
@@ -32,6 +33,14 @@ class NotesView {
   this.model.addNote(newNote);
   this.displayNotes();
   }
+
+  displayNotesFromApi = async () => {
+    await this.client.loadNotes((data) => {
+      this.model.setNotes(data);
+      this.displayNotes();
+    })
+  }
 }
+
 
 module.exports = NotesView;
