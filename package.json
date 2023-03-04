@@ -1,7 +1,6 @@
 {
   "name": "notes-app",
   "version": "1.0.0",
-  "description": "",
   "main": "index.js",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
@@ -12,9 +11,11 @@
   "license": "ISC",
   "dependencies": {
     "jest": "^29.4.3",
-    "jest-fetch-mock": "^3.0.3"
+    "jest-environment-jsdom": "^29.4.3"
   },
   "devDependencies": {
-    "jest-environment-jsdom": "^29.4.3"
-  }
+    "esbuild": "^0.17.11",
+    "jest-fetch-mock": "^3.0.3"
+  },
+  "description": ""
 }

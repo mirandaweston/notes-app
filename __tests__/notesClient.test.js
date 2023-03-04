@@ -19,15 +19,16 @@ describe('notesClient class', () => {
     });
   });
 
-  it('sends a POST request to the notes backend to create a new note', (done) => {
+  it('sends a POST request using fetch to create a new note', (done) => {
     const client = new NotesClient();
 
-    fetch.mockResponseOnce(JSON.stringify(['buy dog food']));
+    fetch.mockResponseOnce(JSON.stringify({
+      note: "buy dog food",
+    }));
 
-    client.createNote('buy dog food', (returnedData) => {
-      expect(returnedData.length).toBe(1);
-      expect(returnedData[returnedData.length -1]).toEqual('buy dog food');
+    client.createNote('buy dog food', (returnedDataFromApi) => {
+      expect(returnedDataFromApi.note).toBe('buy dog food');
       done();
-    })
-  })
+    });
+  });
 })

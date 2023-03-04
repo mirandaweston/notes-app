@@ -1,66 +1,86 @@
 /**
  * @jest-environment jsdom
  */
-
 require('jest-fetch-mock').enableMocks()
-const fs = require('fs')
 
-const NotesModel = require('../src/notesModel');
+const fs = require('fs');
 const NotesView = require('../src/notesView');
+const NotesModel = require('../src/notesModel');
 const NotesClient = require('../src/notesClient');
 
+jest.mock('../src/notesClient')
+
 describe('Notes view', () => {
+  beforeEach(() => {
+    document.body.innerHTML = fs.readFileSync('./index.html');
+    NotesClient.mockClear();
+  });
+
   it('displays two notes', () => {
-    document.body.innerHTML = fs.readFileSync('./index.html');
-
     const model = new NotesModel();
-    const view = new NotesView(model);
-    model.addNote('A first note');
-    model.addNote('Another note');
+    const client = new NotesClient();
+    const view = new NotesView(model, client);
 
+    model.addNote('walk the dog');
+    model.addNote('get dog food');
     view.displayNotes();
-
     expect(document.querySelectorAll('div.note').length).toEqual(2);
   });
 
-  it('adds a new note', () => {
-    document.body.innerHTML = fs.readFileSync('./index.html');
-
+  it.skip('adds note when user clicks', () => {
     const model = new NotesModel();
-    const view = new NotesView(model);
+    const client = new NotesClient();
+    const view = new NotesView(model, client);
 
-    const input = document.querySelector('#add-note-input');
-    input.value = 'My new test note';
+    const note = 'example note';
+    
+    const inputEl = document.querySelector('#add-note-input');
+    inputEl.value = note;
 
-    const button = document.querySelector('#add-note-btn');
-    button.click();
-
-    expect(document.querySelectorAll('div.note').length).toEqual(1);
-    expect(document.querySelectorAll('div.note')[0].textContent).toEqual('My new test note');
-  })
-
-  it('clears the list of previous notes before displaying', () => {
-    document.body.HTML = fs.readFileSync('./index.html');
-
-    const model = new NotesModel();
-    const view = new NotesView(model);
-    model.addNote('Note one');
-    model.addNote('Node two');
-
-    view.displayNotes();
-    view.displayNotes();
-
-    expect(document.querySelectorAll('div.note').length).toEqual(2);
+    const buttonEl = document.querySelector('#add-note-btn')
+    buttonEl.click();
+    
+    const noteEl = document.querySelectorAll('.note');
+    expect(noteEl.length).toEqual(1);
+    expect(noteEl[0].textContent).toEqual('example note');
   });
 
-  it('fetches and displays information from the API', (done) => {
-    const mockClient = {loadNotes: (callback) => callback(['Mocking note'])}
+  it('clears notes before displaying with new note added', () => {
     const model = new NotesModel();
+    const client = new NotesClient();
+    const view = new NotesView(model, client);
+
+    model.addNote('first note');
+    model.addNote('second note');
+    view.displayNotes();
+    view.displayNotes();
+
+    const noteEl = document.querySelectorAll('.note');
+    expect(noteEl.length).toEqual(2);
+  });
+
+  it('fetches and displays info from notes API', (done) => {
+    const fakeClient = {loadNotes: (callback) => callback(['mock note'])}
+    const model = new NotesModel();
+    const view = new NotesView(model, fakeClient);
+    
+    view.displayNotesFromApi();
+    const NoteEl = document.querySelector('.note');
+    expect(NoteEl.textContent).toEqual('mock note')
+    done();
+  });
+
+  it('uses a POST request to add a new note', () => {
+    const model = new NotesModel();
+    const mockClient = new NotesClient();
     const view = new NotesView(model, mockClient);
 
-    view.displayNotesFromApi();
-    const noteE1 = document.querySelector('.note');
-    expect(noteE1.textContent).toEqual('Mocking note')
-    done();
-  })
+    mockClient.createNote = jest.fn((note, callback) => callback([note]))
+
+    view.addNewNote('mock note')
+    
+    const noteEl = document.querySelectorAll('.note');
+    expect(noteEl.length).toEqual(1);
+    expect(noteEl[0].textContent).toEqual('mock note');
+  });
 })

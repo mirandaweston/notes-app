@@ -2,43 +2,46 @@ class NotesView {
   constructor(model, client) {
     this.model = model;
     this.client = client;
-    this.mainContainerE1 = document.querySelector('#main-container');
+    this.mainContainerEl = document.querySelector('#main-container');
 
     this.buttonEl = document.querySelector('#add-note-btn');
-    const newNote = document.querySelector('#add-note-input').value;
 
     this.buttonEl.addEventListener('click', () => {
       const newNote = document.querySelector('#add-note-input').value;
       this.addNewNote(newNote);
+
+      this.displayNotes();
     });
   }
 
-  displayNotes() {
-    document.querySelectorAll('.note').forEach(element => {
-      element.remove();
+  displayNotes = () => {
+    document.querySelectorAll('.note').forEach(note => {
+      note.remove();
     });
 
-    const notes = this.model.getNotes();
+    const notes = this.model.getNotes()
 
-    notes.forEach(note => {
-      const noteE1 = document.createElement('div');
-      noteE1.textContent = note;
-      noteE1.className = 'note';
-      this.mainContainerE1.append(noteE1);
-    })
-
+    notes.forEach((note) => {
+      const noteEl = document.createElement('div');
+      noteEl.textContent = note;
+      noteEl.className = 'note';
+      this.mainContainerEl.append(noteEl);
+    });
+    document.querySelector('#add-note-input').value = "";
   }
 
-  addNewNote(newNote) {
-  this.model.addNote(newNote);
-  this.displayNotes();
+  addNewNote = (newNote) => {
+    this.client.createNote(newNote, (data) => {
+      this.model.setNotes(data);
+      this.displayNotes();
+    });
   }
 
   displayNotesFromApi = async () => {
     await this.client.loadNotes((data) => {
       this.model.setNotes(data);
       this.displayNotes();
-    })
+    });
   }
 }
 
